@@ -20,7 +20,7 @@ import {
   Music2,
   Plus
 } from 'lucide-react';
-import { PlatformSafeZone, CaptionStyleConfig, VideoAspectRatio } from '../../types';
+import { PlatformSafeZone, CaptionStyleConfig, VideoAspectRatio, InspectorState } from '../../types';
 
 interface VideoMonitorProps {
   isPlaying: boolean;
@@ -32,6 +32,7 @@ interface VideoMonitorProps {
   onSafeZoneChange: (zone: PlatformSafeZone) => void;
   captionConfig: CaptionStyleConfig;
   aspectRatio?: VideoAspectRatio;
+  inspectorState?: InspectorState;
 }
 
 export const VideoMonitor: React.FC<VideoMonitorProps> = ({
@@ -44,6 +45,7 @@ export const VideoMonitor: React.FC<VideoMonitorProps> = ({
   onSafeZoneChange,
   captionConfig,
   aspectRatio = '9:16',
+  inspectorState,
 }) => {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolume] = useState(80);
@@ -135,11 +137,26 @@ export const VideoMonitor: React.FC<VideoMonitorProps> = ({
         <div className="relative h-full max-h-[540px] aspect-[9/16] rounded-2xl overflow-hidden shadow-2xl bg-black border border-[#2b334a] flex items-center justify-center group">
           
           {/* Simulated Video Creator Background (matching Image 1, 3, 5, 6) */}
-          <div className="absolute inset-0 w-full h-full">
+          <div 
+            className="absolute inset-0 w-full h-full overflow-hidden transition-transform duration-75"
+            style={{
+              transform: inspectorState ? `translate(${inspectorState.posX * 0.2}px, ${inspectorState.posY * 0.2}px) scale(${inspectorState.scale}) rotate(${inspectorState.rotation}deg)` : undefined,
+              opacity: inspectorState ? (inspectorState.opacity / 100) : 1,
+            }}
+          >
             <img
               src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&auto=format&fit=crop&q=85"
               alt="Creator Video"
               className="w-full h-full object-cover object-center"
+              style={{
+                filter: inspectorState ? `
+                  brightness(${1 + (inspectorState.exposure || 0) * 0.5})
+                  contrast(${1 + (inspectorState.contrast || 0) * 0.5})
+                  saturate(${Math.max(0, 1 + (inspectorState.saturation || 0) * 0.5)})
+                  hue-rotate(${(inspectorState.temperature || 0) * 15}deg)
+                  sepia(${Math.max(0, (inspectorState.temperature || 0) * 0.2)})
+                ` : undefined
+              }}
               referrerPolicy="no-referrer"
             />
             {/* Subtle cinematic gradient overlay */}

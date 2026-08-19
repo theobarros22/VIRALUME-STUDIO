@@ -239,6 +239,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             onSafeZoneChange={onSafeZoneChange}
             captionConfig={captionConfig}
             aspectRatio={project.aspectRatio}
+            inspectorState={inspectorState}
           />
         </div>
       </div>

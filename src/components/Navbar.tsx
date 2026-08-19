@@ -12,7 +12,9 @@ import {
   FileVideo,
   Eye,
   CheckCircle2,
-  Tv2
+  Tv2,
+  Mic,
+  Keyboard
 } from 'lucide-react';
 import { ScreenMode, ProjectData } from '../types';
 
@@ -21,7 +23,8 @@ interface NavbarProps {
   onNavigate: (screen: ScreenMode) => void;
   project: ProjectData;
   onOpenExport: () => void;
-  onOpenSocialPresets?: () => void;
+  onOpenVoiceover?: () => void;
+  onOpenShortcuts?: () => void;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -29,6 +32,8 @@ export const Navbar: React.FC<NavbarProps> = ({
   onNavigate,
   project,
   onOpenExport,
+  onOpenVoiceover,
+  onOpenShortcuts,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -139,7 +144,27 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Actions & Export Button */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2">
+          {onOpenVoiceover && (
+            <button
+              onClick={onOpenVoiceover}
+              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#142621] text-emerald-300 border border-emerald-500/40 hover:bg-[#1a332c] text-xs font-semibold shadow-sm transition-colors"
+            >
+              <Mic className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Vozes IA</span>
+            </button>
+          )}
+
+          {onOpenShortcuts && (
+            <button
+              onClick={onOpenShortcuts}
+              title="Atalhos de Teclado"
+              className="p-1.5 rounded-lg bg-[#181d2c] text-slate-400 hover:text-slate-200 border border-[#2b334a] hover:bg-[#20273a] transition-colors"
+            >
+              <Keyboard className="w-4 h-4" />
+            </button>
+          )}
+
           <button 
             onClick={() => onNavigate('screens_reference')}
             className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { SoundItem } from '../../types';
 import { SFX_ITEMS } from '../../data/mockData';
+import { soundSynth } from '../../utils/audioSynth';
 
 interface SFXLibraryPanelProps {
   onAddToTimeline?: (item: SoundItem) => void;
@@ -36,11 +37,15 @@ export const SFXLibraryPanel: React.FC<SFXLibraryPanelProps> = ({ onAddToTimelin
     return matchesFolder && matchesSearch;
   });
 
-  const togglePlay = (id: string) => {
-    if (playingId === id) {
+  const togglePlay = (item: SoundItem) => {
+    if (playingId === item.id) {
       setPlayingId(null);
     } else {
-      setPlayingId(id);
+      setPlayingId(item.id);
+      soundSynth.playPreset(item.name);
+      setTimeout(() => {
+        setPlayingId(null);
+      }, 1500);
     }
   };
 
@@ -177,7 +182,7 @@ export const SFXLibraryPanel: React.FC<SFXLibraryPanelProps> = ({ onAddToTimelin
                     {/* Left: Play button, Star, Title */}
                     <div className="flex items-center gap-3 w-full sm:w-auto">
                       <button
-                        onClick={() => togglePlay(item.id)}
+                        onClick={() => togglePlay(item)}
                         className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all ${
                           isPlaying
                             ? 'bg-cyan-400 text-black shadow-lg shadow-cyan-400/30 scale-105'

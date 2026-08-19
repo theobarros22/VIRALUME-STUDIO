@@ -9,11 +9,14 @@ import { RetentionAnalyticsPanel } from './components/Analytics/RetentionAnalyti
 import { SFXLibraryPanel } from './components/SFX/SFXLibraryPanel';
 import { ScreensReferenceGallery } from './components/Reference/ScreensReferenceGallery';
 import { ExportModal } from './components/Export/ExportModal';
+import { VoiceoverStudioModal } from './components/Voiceover/VoiceoverStudioModal';
+import { ShortcutsModal } from './components/Settings/ShortcutsModal';
 import { 
   ScreenMode, 
   ProjectData, 
   PlatformSafeZone, 
-  CaptionStyleConfig 
+  CaptionStyleConfig,
+  TimelineClip
 } from './types';
 import { 
   RECENT_PROJECTS, 
@@ -26,6 +29,8 @@ export function App() {
   const [safeZone, setSafeZone] = useState<PlatformSafeZone>('instagram_reels');
   const [captionConfig, setCaptionConfig] = useState<CaptionStyleConfig>(DEFAULT_CAPTION_CONFIG);
   const [isExportOpen, setIsExportOpen] = useState<boolean>(false);
+  const [isVoiceoverOpen, setIsVoiceoverOpen] = useState<boolean>(false);
+  const [isShortcutsOpen, setIsShortcutsOpen] = useState<boolean>(false);
   const [projectsList, setProjectsList] = useState<ProjectData[]>(RECENT_PROJECTS);
 
   // Handle opening a project
@@ -68,6 +73,8 @@ export function App() {
         onNavigate={setCurrentScreen}
         project={activeProject}
         onOpenExport={() => setIsExportOpen(true)}
+        onOpenVoiceover={() => setIsVoiceoverOpen(true)}
+        onOpenShortcuts={() => setIsShortcutsOpen(true)}
       />
 
       {/* Main View Area Routing */}
@@ -147,6 +154,23 @@ export function App() {
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
+      />
+
+      {/* AI Voiceover & Dubbing Studio Modal */}
+      <VoiceoverStudioModal
+        isOpen={isVoiceoverOpen}
+        onClose={() => setIsVoiceoverOpen(false)}
+        currentTime={15.2}
+        onAddVoiceClip={(clip) => {
+          // Add voice clip
+          setCurrentScreen('editor');
+        }}
+      />
+
+      {/* Keyboard Shortcuts Guide Modal */}
+      <ShortcutsModal
+        isOpen={isShortcutsOpen}
+        onClose={() => setIsShortcutsOpen(false)}
       />
     </div>
   );
