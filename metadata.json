@@ -2,5 +2,7 @@
   "name": "Viralume Studio",
   "description": "Suíte profissional de edição de vídeo, transcrição sincronizada por IA, legendas dinâmicas, análise de retenção e efeitos para redes sociais (Reels, TikTok, Shorts).",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

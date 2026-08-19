@@ -14,7 +14,15 @@ import {
   CheckCircle2,
   Tv2,
   Mic,
-  Keyboard
+  Keyboard,
+  Flame,
+  Undo2,
+  Redo2,
+  Image as ImageIcon,
+  Volume2,
+  Crop,
+  Instagram,
+  Scissors
 } from 'lucide-react';
 import { ScreenMode, ProjectData } from '../types';
 
@@ -25,6 +33,19 @@ interface NavbarProps {
   onOpenExport: () => void;
   onOpenVoiceover?: () => void;
   onOpenShortcuts?: () => void;
+  onOpenHooks?: () => void;
+  onOpenOverlays?: () => void;
+  onOpenThumbnailStudio?: () => void;
+  onOpenAudioMixer?: () => void;
+  onOpenAutoFraming?: () => void;
+  onOpenMagicMask?: () => void;
+  onOpenInstagramCopy?: () => void;
+  onOpenRepurposeAI?: () => void;
+  onOpenTranscriptionWizard?: () => void;
+  onUndo?: () => void;
+  onRedo?: () => void;
+  canUndo?: boolean;
+  canRedo?: boolean;
 }
 
 export const Navbar: React.FC<NavbarProps> = ({
@@ -34,6 +55,19 @@ export const Navbar: React.FC<NavbarProps> = ({
   onOpenExport,
   onOpenVoiceover,
   onOpenShortcuts,
+  onOpenHooks,
+  onOpenOverlays,
+  onOpenThumbnailStudio,
+  onOpenAudioMixer,
+  onOpenAutoFraming,
+  onOpenMagicMask,
+  onOpenInstagramCopy,
+  onOpenRepurposeAI,
+  onOpenTranscriptionWizard,
+  onUndo,
+  onRedo,
+  canUndo = true,
+  canRedo = false,
 }) => {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
 
@@ -104,8 +138,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                     )}
                     {menu === 'Editar' && (
                       <>
-                        <button onClick={() => setActiveMenu(null)} className="w-full text-left px-3 py-1.5 hover:bg-indigo-600/30">Desfazer (Ctrl+Z)</button>
-                        <button onClick={() => setActiveMenu(null)} className="w-full text-left px-3 py-1.5 hover:bg-indigo-600/30">Refazer (Ctrl+Y)</button>
+                        <button onClick={() => { if (onUndo) onUndo(); setActiveMenu(null); }} className="w-full text-left px-3 py-1.5 hover:bg-indigo-600/30">Desfazer (Ctrl+Z)</button>
+                        <button onClick={() => { if (onRedo) onRedo(); setActiveMenu(null); }} className="w-full text-left px-3 py-1.5 hover:bg-indigo-600/30">Refazer (Ctrl+Shift+Z)</button>
                         <button onClick={() => { onNavigate('transcription_text'); setActiveMenu(null); }} className="w-full text-left px-3 py-1.5 hover:bg-indigo-600/30">Cortar Silêncios com IA</button>
                       </>
                     )}
@@ -116,6 +150,26 @@ export const Navbar: React.FC<NavbarProps> = ({
                 )}
               </div>
             ))}
+          </div>
+
+          {/* Quick Undo / Redo Buttons */}
+          <div className="hidden sm:flex items-center gap-1 border-l border-slate-700/60 pl-2">
+            <button
+              onClick={onUndo}
+              disabled={!canUndo}
+              title="Desfazer (Ctrl+Z)"
+              className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-[#1f2537] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <Undo2 className="w-3.5 h-3.5" />
+            </button>
+            <button
+              onClick={onRedo}
+              disabled={!canRedo}
+              title="Refazer (Ctrl+Shift+Z)"
+              className="p-1.5 rounded text-slate-400 hover:text-white hover:bg-[#1f2537] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <Redo2 className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 
@@ -144,14 +198,91 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Right Actions & Export Button */}
-        <div className="flex items-center gap-2">
-          {onOpenVoiceover && (
+        <div className="flex items-center gap-1.5">
+          {onOpenTranscriptionWizard && (
             <button
-              onClick={onOpenVoiceover}
-              className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#142621] text-emerald-300 border border-emerald-500/40 hover:bg-[#1a332c] text-xs font-semibold shadow-sm transition-colors"
+              onClick={onOpenTranscriptionWizard}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white text-xs font-bold shadow-md shadow-indigo-600/30 transition-all hover:scale-105"
+              title="Transcrever Áudio do Vídeo e Gerar Legendas Automáticas por IA"
             >
-              <Mic className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Vozes IA</span>
+              <Sparkles className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+              <span>Transcrever & Legendas</span>
+            </button>
+          )}
+
+          {onOpenRepurposeAI && (
+            <button
+              onClick={onOpenRepurposeAI}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-950/90 to-purple-950/90 text-indigo-300 border border-indigo-500/40 hover:border-indigo-400 text-xs font-semibold shadow-sm transition-all hover:scale-105"
+              title="Transformar Vídeo Longo em Múltiplos Cortes Verticais (9:16)"
+            >
+              <Scissors className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Cortes IA (Repurpose)</span>
+            </button>
+          )}
+
+          {onOpenInstagramCopy && (
+            <button
+              onClick={onOpenInstagramCopy}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-rose-950/80 to-purple-950/80 text-rose-300 border border-rose-500/40 hover:border-rose-400 text-xs font-semibold shadow-sm transition-all hover:scale-105"
+              title="Gerador de Legenda e Copy Otimizada para Instagram Reels"
+            >
+              <Instagram className="w-3.5 h-3.5 text-rose-400" />
+              <span>Copy Instagram</span>
+            </button>
+          )}
+
+          {onOpenThumbnailStudio && (
+            <button
+              onClick={onOpenThumbnailStudio}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#1f1d2c] text-amber-300 border border-amber-500/40 hover:bg-[#2c2840] text-xs font-semibold shadow-sm transition-colors"
+              title="Criar Capa 9:16 para Reels e TikTok"
+            >
+              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+              <span>Capas 9:16</span>
+            </button>
+          )}
+
+          {onOpenAudioMixer && (
+            <button
+              onClick={onOpenAudioMixer}
+              className="hidden lg:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#12242b] text-cyan-300 border border-cyan-500/40 hover:bg-[#18323d] text-xs font-semibold shadow-sm transition-colors"
+              title="Mixer de Áudio e Auto-Ducking (-14 LUFS)"
+            >
+              <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+              <span>Ducking & Áudio</span>
+            </button>
+          )}
+
+          {onOpenAutoFraming && (
+            <button
+              onClick={onOpenAutoFraming}
+              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#1a1b2d] text-indigo-300 border border-indigo-500/40 hover:bg-[#252740] text-xs font-semibold shadow-sm transition-colors"
+              title="Auto-Framing e Rastreamento Facial IA"
+            >
+              <Crop className="w-3.5 h-3.5 text-indigo-400" />
+              <span>Auto-Framing IA</span>
+            </button>
+          )}
+
+          {onOpenMagicMask && (
+            <button
+              onClick={onOpenMagicMask}
+              className="hidden xl:flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#27182e] text-purple-300 border border-purple-500/40 hover:bg-[#382242] text-xs font-semibold shadow-sm transition-colors"
+              title="Máscara Mágica e Texto Atrás do Sujeito"
+            >
+              <Layers className="w-3.5 h-3.5 text-purple-400" />
+              <span>Texto Atrás</span>
+            </button>
+          )}
+
+          {onOpenHooks && (
+            <button
+              onClick={onOpenHooks}
+              className="hidden md:flex items-center gap-1.5 px-2 py-1.5 rounded-lg bg-[#281c10] text-amber-300 border border-amber-500/40 hover:bg-[#382614] text-xs font-semibold shadow-sm transition-colors"
+            >
+              <Flame className="w-3.5 h-3.5 text-amber-400" />
+              <span>Ganchos</span>
             </button>
           )}
 
@@ -165,21 +296,9 @@ export const Navbar: React.FC<NavbarProps> = ({
             </button>
           )}
 
-          <button 
-            onClick={() => onNavigate('screens_reference')}
-            className={`hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-              currentScreen === 'screens_reference' 
-                ? 'bg-purple-600/20 text-purple-300 border-purple-500/50 shadow-sm' 
-                : 'bg-[#181d2c] text-slate-300 border-[#2b334a] hover:bg-[#20273a]'
-            }`}
-          >
-            <Tv2 className="w-3.5 h-3.5 text-purple-400" />
-            <span>Guia das 15 Telas</span>
-          </button>
-
           <button
             onClick={onOpenExport}
-            className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-semibold shadow-md shadow-indigo-600/25 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Download className="w-3.5 h-3.5" />
             <span>Exportar Vídeo</span>

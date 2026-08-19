@@ -10,7 +10,7 @@ export type ScreenMode =
 
 export type PlatformSafeZone = 'instagram_reels' | 'tiktok' | 'youtube_shorts' | 'none';
 
-export type VideoAspectRatio = '9:16' | '16:9' | '1:1';
+export type VideoAspectRatio = '9:16' | '16:9' | '1:1' | '4:5' | '4:3';
 
 export type CaptionPresetType = 
   | 'viral_energetic'
@@ -110,6 +110,10 @@ export interface ProjectData {
   thumbnail: string;
   status: string;
   estimatedSize: string;
+  videoFileUrl?: string;
+  videoFileName?: string;
+  isEmptyProject?: boolean;
+  transcript?: TranscriptSegment[];
 }
 
 export interface AIInsightMetrics {
@@ -191,3 +195,40 @@ export interface InspectorState {
   gammaColor: string;
   gainColor: string;
 }
+
+export interface AutoDuckingConfig {
+  enabled: boolean;
+  reductionDb: number; // e.g. -16 dB
+  thresholdDb: number; // e.g. -24 dB
+  attackMs: number; // e.g. 50 ms
+  releaseMs: number; // e.g. 400 ms
+  normalizeLufs: number; // -14 LUFS standard
+  vocalClarity: boolean;
+}
+
+export interface AutoFramingConfig {
+  enabled: boolean;
+  mode: 'single_speaker' | 'speaker_switch' | 'action_track';
+  trackingSmoothness: number; // 0-100
+  zoomLevel: number; // 1.0 - 2.5
+  centerOffsetY: number; // -50 to 50%
+}
+
+export interface ThumbnailConfig {
+  title: string;
+  subtitle: string;
+  badgeText: string;
+  badgeColor: string;
+  sticker: 'fire' | 'money' | 'warning' | 'star' | 'arrow' | 'none';
+  filterStyle: 'clean' | 'high_contrast' | 'neon_glow' | 'vintage';
+  aspectRatio: VideoAspectRatio;
+  fontSize: number;
+}
+
+export interface HistoryItem {
+  id: string;
+  label: string;
+  timestamp: string;
+  clipsSnapshot: TimelineClip[];
+}
+

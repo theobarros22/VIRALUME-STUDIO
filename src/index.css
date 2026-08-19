@@ -1,1 +1,17 @@
 @import "tailwindcss";
+
+/* Real-time active transcription and caption sync styling */
+.transcript-segment.active,
+.transcript-word.active,
+.caption-track-item.active,
+.active.transcript-item {
+  border-color: #6366f1 !important;
+  background-color: rgba(99, 102, 241, 0.28) !important;
+  box-shadow: 0 0 16px rgba(99, 102, 241, 0.35) !important;
+}
+
+.transcript-word.active {
+  color: #fde047 !important;
+  font-weight: 800 !important;
+  transform: scale(1.08);
+}

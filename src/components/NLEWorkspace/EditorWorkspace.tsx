@@ -9,7 +9,8 @@ import {
   TimelineClip, 
   InspectorState, 
   PlatformSafeZone, 
-  CaptionStyleConfig 
+  CaptionStyleConfig,
+  VideoAspectRatio
 } from '../../types';
 import { INITIAL_CLIPS } from '../../data/mockData';
 
@@ -18,8 +19,11 @@ interface EditorWorkspaceProps {
   captionConfig: CaptionStyleConfig;
   safeZone: PlatformSafeZone;
   onSafeZoneChange: (zone: PlatformSafeZone) => void;
+  onAspectRatioChange?: (ratio: VideoAspectRatio) => void;
   onOpenExport: () => void;
   onCutSilenceSuccess?: () => void;
+  onUploadVideo?: (file: File) => void;
+  onOpenTranscriptionWizard?: () => void;
 }
 
 export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
@@ -27,14 +31,91 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
   captionConfig,
   safeZone,
   onSafeZoneChange,
+  onAspectRatioChange,
   onOpenExport,
   onCutSilenceSuccess,
+  onUploadVideo,
+  onOpenTranscriptionWizard,
 }) => {
   const [isPlaying, setIsPlaying] = useState(false);
-  const [currentTime, setCurrentTime] = useState(15.2);
-  const [duration, setDuration] = useState(project.durationSec || 120);
-  const [clips, setClips] = useState<TimelineClip[]>(INITIAL_CLIPS);
+  const [currentTime, setCurrentTime] = useState(project.isEmptyProject ? 0 : 15.2);
+  const [duration, setDuration] = useState(project.durationSec || 60);
+  const [clips, setClips] = useState<TimelineClip[]>(() => {
+    if (project.isEmptyProject && !project.videoFileUrl) {
+      return [];
+    }
+    if (project.videoFileUrl) {
+      return [
+        {
+          id: `clip-video-${project.id}`,
+          trackId: 'video',
+          name: project.videoFileName || project.name,
+          startOffset: 0,
+          duration: project.durationSec || 30,
+          sourceStart: 0,
+          sourceDuration: project.durationSec || 30,
+          type: 'video',
+          color: '#3b82f6',
+          isProxy: true,
+          isCached: true,
+        },
+        {
+          id: `clip-cap-${project.id}`,
+          trackId: 'captions',
+          name: 'Legendas Automáticas por IA',
+          startOffset: 0,
+          duration: project.durationSec || 30,
+          sourceStart: 0,
+          sourceDuration: project.durationSec || 30,
+          type: 'caption',
+          color: '#f59e0b',
+        }
+      ];
+    }
+    return INITIAL_CLIPS;
+  });
+
+  // Sync clips when project changes
+  useEffect(() => {
+    if (project.isEmptyProject && !project.videoFileUrl) {
+      setClips([]);
+      setCurrentTime(0);
+      setDuration(60);
+    } else if (project.videoFileUrl) {
+      setClips([
+        {
+          id: `clip-video-${project.id}`,
+          trackId: 'video',
+          name: project.videoFileName || project.name,
+          startOffset: 0,
+          duration: project.durationSec || 30,
+          sourceStart: 0,
+          sourceDuration: project.durationSec || 30,
+          type: 'video',
+          color: '#3b82f6',
+          isProxy: true,
+          isCached: true,
+        },
+        {
+          id: `clip-cap-${project.id}`,
+          trackId: 'captions',
+          name: 'Legendas Automáticas por IA',
+          startOffset: 0,
+          duration: project.durationSec || 30,
+          sourceStart: 0,
+          sourceDuration: project.durationSec || 30,
+          type: 'caption',
+          color: '#f59e0b',
+        }
+      ]);
+      setDuration(project.durationSec || 30);
+    }
+  }, [project.id, project.isEmptyProject, project.videoFileUrl, project.durationSec, project.videoFileName, project.name]);
   
+  const [selectedClipId, setSelectedClipId] = useState<string | null>(() => {
+    return clips[0]?.id || null;
+  });
+
   const [inspectorState, setInspectorState] = useState<InspectorState>({
     posX: 148,
     posY: 35,
@@ -62,7 +143,149 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
     y: 0
   });
 
-  // Keyboard shortcuts (Space, J, L, B, Escape)
+  // Split clip at timecode
+  const handleSplitClip = (clipId?: string, splitTime?: number) => {
+    const timeToSplit = splitTime !== undefined ? splitTime : currentTime;
+    
+    // Find target clip: either specified by ID, or intersecting playhead on video track, or selected
+    let target = clips.find(c => c.id === clipId);
+    if (!target) {
+      target = clips.find(c => c.id === selectedClipId && timeToSplit >= c.startOffset && timeToSplit <= c.startOffset + c.duration);
+    }
+    if (!target) {
+      target = clips.find(c => c.trackId === 'video' && timeToSplit >= c.startOffset && timeToSplit <= c.startOffset + c.duration);
+    }
+    if (!target) {
+      target = clips[0];
+    }
+    if (!target) return;
+    
+    const splitPoint = timeToSplit - target.startOffset;
+    
+    if (splitPoint > 0.2 && splitPoint < target.duration - 0.2) {
+      const originalDuration = target.duration;
+      const originalSourceStart = target.sourceStart || 0;
+      
+      const leftClip: TimelineClip = {
+        ...target,
+        duration: splitPoint,
+        sourceDuration: splitPoint
+      };
+      
+      const rightClipId = `clip-split-${Date.now()}`;
+      const rightClip: TimelineClip = {
+        ...target,
+        id: rightClipId,
+        name: `${target.name} (Parte 2)`,
+        startOffset: target.startOffset + splitPoint,
+        duration: originalDuration - splitPoint,
+        sourceStart: originalSourceStart + splitPoint,
+        sourceDuration: originalDuration - splitPoint
+      };
+
+      // Also split corresponding caption clip if it spans across this point
+      const captionClip = clips.find(c => c.trackId === 'captions' && timeToSplit >= c.startOffset && timeToSplit <= c.startOffset + c.duration);
+      let updatedCaptions: TimelineClip[] = [];
+      if (captionClip) {
+        const capSplitPoint = timeToSplit - captionClip.startOffset;
+        if (capSplitPoint > 0.2 && capSplitPoint < captionClip.duration - 0.2) {
+          const capLeft: TimelineClip = {
+            ...captionClip,
+            duration: capSplitPoint,
+            sourceDuration: capSplitPoint
+          };
+          const capRight: TimelineClip = {
+            ...captionClip,
+            id: `clip-cap-split-${Date.now()}`,
+            name: `${captionClip.name} (2)`,
+            startOffset: captionClip.startOffset + capSplitPoint,
+            duration: captionClip.duration - capSplitPoint,
+            sourceStart: (captionClip.sourceStart || 0) + capSplitPoint,
+            sourceDuration: captionClip.duration - capSplitPoint
+          };
+          updatedCaptions = [capLeft, capRight];
+        }
+      }
+
+      setClips(prev => {
+        let filtered = prev.filter(c => c.id !== target!.id);
+        if (captionClip && updatedCaptions.length > 0) {
+          filtered = filtered.filter(c => c.id !== captionClip.id);
+          return [...filtered, leftClip, rightClip, ...updatedCaptions];
+        }
+        return [...filtered, leftClip, rightClip];
+      });
+
+      setSelectedClipId(rightClipId);
+    }
+  };
+
+  // Delete clip
+  const handleDeleteClip = (clipId: string) => {
+    setClips(prev => {
+      const target = prev.find(c => c.id === clipId);
+      if (!target) return prev;
+      return prev.filter(c => c.id !== clipId);
+    });
+    if (selectedClipId === clipId) {
+      setSelectedClipId(null);
+    }
+  };
+
+  // Duplicate clip
+  const handleDuplicateClip = (clipId: string) => {
+    const target = clips.find(c => c.id === clipId);
+    if (!target) return;
+    const newId = `clip-dup-${Date.now()}`;
+    const newClip: TimelineClip = {
+      ...target,
+      id: newId,
+      name: `${target.name} (Cópia)`,
+      startOffset: target.startOffset + target.duration + 0.5,
+    };
+    setClips(prev => [...prev, newClip]);
+    setSelectedClipId(newId);
+  };
+
+  // Trim clip
+  const handleTrimClip = (clipId: string, newStartOffset: number, newDuration: number, newSourceStart?: number) => {
+    setClips(prev => prev.map(c => {
+      if (c.id === clipId) {
+        return {
+          ...c,
+          startOffset: newStartOffset,
+          duration: newDuration,
+          sourceStart: newSourceStart !== undefined ? newSourceStart : c.sourceStart
+        };
+      }
+      return c;
+    }));
+  };
+
+  // Cut silence
+  const handleCutSilence = () => {
+    // Automatically perform realistic silence cuts
+    setClips(prev => {
+      const videoClips = prev.filter(c => c.trackId === 'video');
+      if (videoClips.length === 0) return prev;
+      
+      // Trim slightly from middle to simulate 1.5s silence removal
+      const updated = prev.map(c => {
+        if (c.trackId === 'video' || c.trackId === 'captions') {
+          return {
+            ...c,
+            duration: Math.max(2, c.duration - 1.4)
+          };
+        }
+        return c;
+      });
+      return updated;
+    });
+
+    if (onCutSilenceSuccess) onCutSilenceSuccess();
+  };
+
+  // Keyboard shortcuts (Space, J, L, B, C, Delete, Escape)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Don't trigger if user is typing in an input
@@ -79,9 +302,14 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
       } else if (e.key === 'l' || e.key === 'L') {
         e.preventDefault();
         setCurrentTime(prev => Math.min(duration, prev + 5));
-      } else if (e.key === 'b' || e.key === 'B') {
+      } else if (e.key === 'c' || e.key === 'C' || e.key === 'b' || e.key === 'B') {
         e.preventDefault();
-        handleSplitClip('clip-vid-1');
+        handleSplitClip(selectedClipId || undefined, currentTime);
+      } else if (e.key === 'Delete' || e.key === 'Backspace') {
+        if (selectedClipId) {
+          e.preventDefault();
+          handleDeleteClip(selectedClipId);
+        }
       } else if (e.key === 'Escape') {
         setContextMenuState(prev => ({ ...prev, visible: false }));
       }
@@ -89,24 +317,37 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [duration]);
+  }, [duration, selectedClipId, currentTime, clips]);
 
-  // Playback timer simulation
+  // Playback timer simulation for projects without native HTML5 video file
   useEffect(() => {
-    let interval: any = null;
-    if (isPlaying) {
-      interval = setInterval(() => {
+    let animId: number;
+    let lastTime = performance.now();
+
+    if (isPlaying && !project.videoFileUrl) {
+      const step = (now: number) => {
+        const dt = (now - lastTime) / 1000;
+        lastTime = now;
+
         setCurrentTime((prev) => {
-          if (prev >= duration) {
+          const next = prev + dt;
+          if (next >= duration) {
             setIsPlaying(false);
             return 0;
           }
-          return prev + 0.1;
+          return next;
         });
-      }, 100);
+
+        animId = requestAnimationFrame(step);
+      };
+
+      animId = requestAnimationFrame(step);
     }
-    return () => clearInterval(interval);
-  }, [isPlaying, duration]);
+
+    return () => {
+      if (animId) cancelAnimationFrame(animId);
+    };
+  }, [isPlaying, duration, project.videoFileUrl]);
 
   // Handle Inspector change
   const handleInspectorChange = (newState: Partial<InspectorState>) => {
@@ -131,35 +372,6 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
     });
   };
 
-  // Split clip at playhead (Blade action Ctrl+B)
-  const handleSplitClip = (clipId: string) => {
-    const target = clips.find(c => c.id === clipId) || clips[2];
-    if (!target) return;
-    
-    const newId = `clip-split-${Date.now()}`;
-    const splitPoint = currentTime - target.startOffset;
-    
-    if (splitPoint > 1 && splitPoint < target.duration - 1) {
-      const originalDuration = target.duration;
-      const updatedOriginal: TimelineClip = {
-        ...target,
-        duration: splitPoint
-      };
-      const newClip: TimelineClip = {
-        ...target,
-        id: newId,
-        name: `${target.name} (Parte 2)`,
-        startOffset: target.startOffset + splitPoint,
-        duration: originalDuration - splitPoint
-      };
-      setClips(prev => [...prev.filter(c => c.id !== target.id), updatedOriginal, newClip]);
-    }
-  };
-
-  const handleCutSilence = () => {
-    if (onCutSilenceSuccess) onCutSilenceSuccess();
-  };
-
   const handleOpenContextMenu = (x: number, y: number, clip?: TimelineClip) => {
     setContextMenuState({
       visible: true,
@@ -170,12 +382,15 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
   };
 
   const handleContextMenuAction = (action: string) => {
-    if (action === 'Dividir no Playhead') {
-      handleSplitClip('clip-vid-1');
+    if (action === 'Dividir no Playhead' || action === 'Recortar') {
+      handleSplitClip(selectedClipId || undefined, currentTime);
+    } else if (action === 'Apagar') {
+      if (selectedClipId) handleDeleteClip(selectedClipId);
+    } else if (action === 'Duplicar') {
+      if (selectedClipId) handleDuplicateClip(selectedClipId);
     } else if (action === 'Cortar Silêncios') {
       handleCutSilence();
     } else {
-      // Notification feedback
       console.log(`Action executed: ${action}`);
     }
   };
@@ -213,6 +428,7 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
                   isCached: item.isCached
                 };
                 setClips(prev => [...prev, newClip]);
+                setSelectedClipId(newClip.id);
               }}
             />
           </div>
@@ -239,7 +455,27 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
             onSafeZoneChange={onSafeZoneChange}
             captionConfig={captionConfig}
             aspectRatio={project.aspectRatio}
+            onAspectRatioChange={onAspectRatioChange}
             inspectorState={inspectorState}
+            videoFileUrl={project.videoFileUrl}
+            isEmptyProject={project.isEmptyProject}
+            onUploadVideo={onUploadVideo}
+            customTranscript={project.transcript}
+            onDurationDetected={(detectedDuration) => {
+              if (detectedDuration && detectedDuration > 0 && Math.abs(detectedDuration - duration) > 1) {
+                setDuration(detectedDuration);
+                setClips(prev => prev.map(c => {
+                  if (c.trackId === 'video' || c.trackId === 'captions') {
+                    return {
+                      ...c,
+                      duration: detectedDuration,
+                      sourceDuration: detectedDuration
+                    };
+                  }
+                  return c;
+                }));
+              }
+            }}
           />
         </div>
       </div>
@@ -254,6 +490,11 @@ export const EditorWorkspace: React.FC<EditorWorkspaceProps> = ({
           onOpenContextMenu={handleOpenContextMenu}
           onCutSilence={handleCutSilence}
           onSplitClip={handleSplitClip}
+          onDeleteClip={handleDeleteClip}
+          onDuplicateClip={handleDuplicateClip}
+          onTrimClip={handleTrimClip}
+          selectedClipId={selectedClipId}
+          onSelectClip={setSelectedClipId}
         />
       </div>
 

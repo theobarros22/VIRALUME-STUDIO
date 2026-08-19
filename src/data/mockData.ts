@@ -11,101 +11,6 @@ import {
   ExportPreset
 } from '../types';
 
-export const INITIAL_PROJECT: ProjectData = {
-  id: 'proj-01',
-  name: 'Viral_Dance_Challenge_v3',
-  duration: '00:03:45',
-  durationSec: 225,
-  timecode: '00:01:15:05',
-  resolution: '1080x1920 (Vertical)',
-  aspectRatio: '9:16',
-  fps: 60.00,
-  lastEdited: 'Hoje às 14:32',
-  thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-  status: 'Pronto para Edição / Exportação',
-  estimatedSize: '1.2 GB'
-};
-
-export const RECENT_PROJECTS: ProjectData[] = [
-  {
-    id: 'proj-01',
-    name: 'Viral_Dance_Challenge_v3',
-    duration: '00:03:45',
-    durationSec: 225,
-    timecode: '00:01:15:05',
-    resolution: '1080x1920 (Vertical)',
-    aspectRatio: '9:16',
-    fps: 60.00,
-    lastEdited: 'Hoje às 14:32',
-    thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
-    status: 'Pronto para Edição',
-    estimatedSize: '1.2 GB'
-  },
-  {
-    id: 'proj-02',
-    name: 'Documentário Natureza',
-    duration: '00:45:00',
-    durationSec: 2700,
-    timecode: '00:12:30:00',
-    resolution: '4K (3840x2160)',
-    aspectRatio: '16:9',
-    fps: 24.00,
-    lastEdited: '2d atrás, 45min',
-    thumbnail: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&auto=format&fit=crop&q=80',
-    status: 'Cache OK (33%)',
-    estimatedSize: '4.8 GB'
-  },
-  {
-    id: 'proj-03',
-    name: 'Tutorial de Edição Viral',
-    duration: '00:15:20',
-    durationSec: 920,
-    timecode: '00:04:15:10',
-    resolution: '1080p (1920x1080)',
-    aspectRatio: '16:9',
-    fps: 60.00,
-    lastEdited: '4d atrás, 15min',
-    thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&auto=format&fit=crop&q=80',
-    status: 'Renderizado',
-    estimatedSize: '850 MB'
-  },
-  {
-    id: 'proj-04',
-    name: 'Vlog de Viagem Skater',
-    duration: '00:22:40',
-    durationSec: 1360,
-    timecode: '00:08:50:00',
-    resolution: '1080x1920 (Vertical)',
-    aspectRatio: '9:16',
-    fps: 60.00,
-    lastEdited: '1s atrás, 22min',
-    thumbnail: 'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?w=600&auto=format&fit=crop&q=80',
-    status: 'Proxy Ativo',
-    estimatedSize: '1.6 GB'
-  }
-];
-
-export const DEFAULT_CAPTION_CONFIG: CaptionStyleConfig = {
-  preset: 'viral_energetic',
-  fontFamily: 'Montserrat',
-  fontSize: 28,
-  textColor: '#FFE600',
-  highlightColor: '#775CFF',
-  outlineColor: '#000000',
-  outlineWidth: 4,
-  hasOutline: true,
-  hasShadow: true,
-  animation: 'pop',
-  animationIntensity: 85,
-  textBehindSubject: 85,
-  popAnimation: 70,
-  bounceAnimation: 30,
-  slideAnimation: 50,
-  positionY: 72
-};
-
-export const INITIAL_CAPTION_CONFIG = DEFAULT_CAPTION_CONFIG;
-
 export const INITIAL_TRANSCRIPT: TranscriptSegment[] = [
   {
     id: 'seg-1',
@@ -183,6 +88,106 @@ export const INITIAL_TRANSCRIPT: TranscriptSegment[] = [
     ]
   }
 ];
+
+export const INITIAL_PROJECT: ProjectData = {
+  id: 'proj-01',
+  name: 'Viral_Dance_Challenge_v3',
+  duration: '00:03:45',
+  durationSec: 225,
+  timecode: '00:01:15:05',
+  resolution: '1080x1920 (Vertical)',
+  aspectRatio: '9:16',
+  fps: 60.00,
+  lastEdited: 'Hoje às 14:32',
+  thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+  status: 'Pronto para Edição / Exportação',
+  estimatedSize: '1.2 GB',
+  transcript: INITIAL_TRANSCRIPT
+};
+
+export const RECENT_PROJECTS: ProjectData[] = [
+  {
+    id: 'proj-01',
+    name: 'Viral_Dance_Challenge_v3',
+    duration: '00:03:45',
+    durationSec: 225,
+    timecode: '00:01:15:05',
+    resolution: '1080x1920 (Vertical)',
+    aspectRatio: '9:16',
+    fps: 60.00,
+    lastEdited: 'Hoje às 14:32',
+    thumbnail: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=600&auto=format&fit=crop&q=80',
+    status: 'Pronto para Edição',
+    estimatedSize: '1.2 GB',
+    transcript: INITIAL_TRANSCRIPT
+  },
+  {
+    id: 'proj-02',
+    name: 'Documentário Natureza',
+    duration: '00:45:00',
+    durationSec: 2700,
+    timecode: '00:12:30:00',
+    resolution: '4K (3840x2160)',
+    aspectRatio: '16:9',
+    fps: 24.00,
+    lastEdited: '2d atrás, 45min',
+    thumbnail: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=600&auto=format&fit=crop&q=80',
+    status: 'Cache OK (33%)',
+    estimatedSize: '4.8 GB',
+    transcript: INITIAL_TRANSCRIPT
+  },
+  {
+    id: 'proj-03',
+    name: 'Tutorial de Edição Viral',
+    duration: '00:15:20',
+    durationSec: 920,
+    timecode: '00:04:15:10',
+    resolution: '1080p (1920x1080)',
+    aspectRatio: '16:9',
+    fps: 60.00,
+    lastEdited: '4d atrás, 15min',
+    thumbnail: 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?w=600&auto=format&fit=crop&q=80',
+    status: 'Renderizado',
+    estimatedSize: '850 MB',
+    transcript: INITIAL_TRANSCRIPT
+  },
+  {
+    id: 'proj-04',
+    name: 'Vlog de Viagem Skater',
+    duration: '00:22:40',
+    durationSec: 1360,
+    timecode: '00:08:50:00',
+    resolution: '1080x1920 (Vertical)',
+    aspectRatio: '9:16',
+    fps: 60.00,
+    lastEdited: '1s atrás, 22min',
+    thumbnail: 'https://images.unsplash.com/photo-1477959858617-67f30bc75b82?w=600&auto=format&fit=crop&q=80',
+    status: 'Proxy Ativo',
+    estimatedSize: '1.6 GB',
+    transcript: INITIAL_TRANSCRIPT
+  }
+];
+
+export const DEFAULT_CAPTION_CONFIG: CaptionStyleConfig = {
+  preset: 'viral_energetic',
+  fontFamily: 'Montserrat',
+  fontSize: 28,
+  textColor: '#FFE600',
+  highlightColor: '#775CFF',
+  outlineColor: '#000000',
+  outlineWidth: 4,
+  hasOutline: true,
+  hasShadow: true,
+  animation: 'pop',
+  animationIntensity: 85,
+  textBehindSubject: 85,
+  popAnimation: 70,
+  bounceAnimation: 30,
+  slideAnimation: 50,
+  positionY: 72
+};
+
+export const INITIAL_CAPTION_CONFIG = DEFAULT_CAPTION_CONFIG;
 
 export const INITIAL_CLIPS: TimelineClip[] = [
   {
@@ -394,43 +399,63 @@ export const INITIAL_AI_SUGGESTIONS: AISuggestion[] = [
 export const EXPORT_PRESETS: ExportPreset[] = [
   {
     id: 'exp-1',
-    name: 'Instagram Reels & Stories',
+    name: 'Instagram Reels & Stories (Padrão 9:16)',
     resolution: '1080x1920 (9:16)',
     codec: 'H.264 / AVC',
     fps: 30,
     bitrate: '15 Mbps',
     estimatedSizeMb: 42,
-    recommendedFor: 'Reels, Stories, Feed Vertical'
+    recommendedFor: 'Reels, Stories, Feed Vertical Otimizado'
   },
   {
     id: 'exp-2',
-    name: 'TikTok FYP High Quality',
+    name: 'TikTok FYP Ultra Quality (9:16)',
     resolution: '1080x1920 (9:16)',
     codec: 'H.265 / HEVC',
     fps: 60,
     bitrate: '20 Mbps',
     estimatedSizeMb: 58,
-    recommendedFor: 'TikTok 60FPS sem compressão'
+    recommendedFor: 'TikTok 60 FPS sem perda de compressão'
   },
   {
     id: 'exp-3',
-    name: 'YouTube Shorts Ultra',
+    name: 'YouTube Shorts 60FPS (9:16)',
     resolution: '1080x1920 (9:16)',
-    codec: 'AV1 / VP9',
+    codec: 'AV1 / H.264',
     fps: 60,
-    bitrate: '25 Mbps',
+    bitrate: '22 Mbps',
     estimatedSizeMb: 65,
-    recommendedFor: 'YouTube Shorts HDR'
+    recommendedFor: 'YouTube Shorts Máxima Fluidez'
   },
   {
     id: 'exp-4',
-    name: 'Master 4K Cinema ProRes',
-    resolution: '3840x2160 (16:9)',
-    codec: 'Apple ProRes 422 HQ',
-    fps: 24,
-    bitrate: '220 Mbps',
-    estimatedSizeMb: 820,
-    recommendedFor: 'Edição offline e arquivo master'
+    name: 'YouTube Padrão 4K / 1080p (16:9)',
+    resolution: '1920x1080 (16:9)',
+    codec: 'H.264 / ProRes',
+    fps: 60,
+    bitrate: '35 Mbps',
+    estimatedSizeMb: 110,
+    recommendedFor: 'YouTube Feed Horizontal, TV e Web'
+  },
+  {
+    id: 'exp-5',
+    name: 'Instagram & Facebook Feed (1:1 Quadrado)',
+    resolution: '1080x1080 (1:1)',
+    codec: 'H.264',
+    fps: 30,
+    bitrate: '12 Mbps',
+    estimatedSizeMb: 35,
+    recommendedFor: 'Feed Quadrado do Instagram e Anúncios'
+  },
+  {
+    id: 'exp-6',
+    name: 'Instagram Feed Retrato Otimizado (4:5)',
+    resolution: '1080x1350 (4:5)',
+    codec: 'H.264',
+    fps: 30,
+    bitrate: '14 Mbps',
+    estimatedSizeMb: 38,
+    recommendedFor: 'Maior preenchimento de tela no feed'
   }
 ];
 

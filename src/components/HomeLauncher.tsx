@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   PlusCircle, 
   FolderOpen, 
@@ -11,22 +11,29 @@ import {
   ArrowRight,
   Video,
   Layers,
-  Wand2
+  Wand2,
+  Smartphone,
+  Upload,
+  FileVideo,
+  Zap
 } from 'lucide-react';
-import { RECENT_PROJECTS } from '../data/mockData';
 import { ProjectData, ScreenMode } from '../types';
 
 interface HomeLauncherProps {
+  projects: ProjectData[];
   onOpenProject: (proj: ProjectData) => void;
-  onNewProject: () => void;
+  onNewProject: (file?: File) => void;
   onNavigate: (screen: ScreenMode) => void;
 }
 
 export const HomeLauncher: React.FC<HomeLauncherProps> = ({
+  projects,
   onOpenProject,
   onNewProject,
   onNavigate,
 }) => {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
   return (
     <div className="min-h-[calc(100vh-80px)] flex flex-col justify-between bg-[#0f1118] text-slate-100 p-6 md:p-10 relative overflow-hidden">
       {/* Subtle background glow */}
@@ -46,7 +53,7 @@ export const HomeLauncher: React.FC<HomeLauncherProps> = ({
           </div>
 
           <div className="space-y-3">
-            {RECENT_PROJECTS.map((proj) => (
+            {projects.slice(0, 5).map((proj) => (
               <div
                 key={proj.id}
                 onClick={() => onOpenProject(proj)}
@@ -83,11 +90,25 @@ export const HomeLauncher: React.FC<HomeLauncherProps> = ({
         {/* Center Column: Big Logo, Slogan & Hero Action Buttons */}
         <div className="lg:col-span-6 flex flex-col items-center text-center px-4 py-8">
           
+          {/* Hidden File Input */}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="video/*,audio/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) {
+                onNewProject(file);
+              }
+            }}
+          />
+
           {/* Logo Illustration resembling Image 13 */}
-          <div className="mb-6 relative">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 p-[2px] shadow-2xl shadow-indigo-600/30">
+          <div className="mb-4 relative">
+            <div className="w-20 h-20 rounded-3xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-cyan-400 p-[2px] shadow-2xl shadow-indigo-600/30">
               <div className="w-full h-full bg-[#11141f] rounded-[22px] flex items-center justify-center">
-                <svg className="w-12 h-12 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <svg className="w-10 h-10 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polygon points="5 3 19 12 5 21 5 3" fill="currentColor" fillOpacity="0.15" />
                   <path d="M12 7v10" stroke="#38bdf8" />
                   <path d="M16 10v4" stroke="#818cf8" />
@@ -95,34 +116,88 @@ export const HomeLauncher: React.FC<HomeLauncherProps> = ({
               </div>
             </div>
             {/* Sparkle badge */}
-            <div className="absolute -top-2 -right-2 p-1.5 rounded-full bg-indigo-500 text-white shadow-lg shadow-indigo-500/50 animate-bounce">
-              <Sparkles className="w-4 h-4" />
+            <div className="absolute -top-1.5 -right-1.5 p-1 rounded-full bg-indigo-500 text-white shadow-lg shadow-indigo-500/50 animate-bounce">
+              <Sparkles className="w-3.5 h-3.5" />
             </div>
           </div>
 
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight font-['Montserrat',sans-serif]">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight font-['Montserrat',sans-serif]">
             Viralume <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-cyan-400">Studio</span>
           </h1>
 
-          <p className="text-sm text-slate-400 max-w-md mt-2 mb-8 leading-relaxed">
-            Plataforma tudo-em-um para criação de vídeos virais, legendagem inteligente por IA, análise de retenção e efeitos para redes sociais.
+          <p className="text-xs sm:text-sm text-slate-400 max-w-md mt-1.5 mb-6 leading-relaxed">
+            Comece importando o seu vídeo para transcrever áudio em texto e gerar legendas dinâmicas em alta velocidade.
           </p>
 
-          {/* Primary Big Buttons as in Image 13 */}
-          <div className="w-full max-w-sm space-y-3.5">
+          {/* Drag & Drop Hero Box */}
+          <div
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              const file = e.dataTransfer.files?.[0];
+              if (file) {
+                onNewProject(file);
+              }
+            }}
+            onClick={() => fileInputRef.current?.click()}
+            className={`w-full max-w-md p-6 rounded-2xl border-2 border-dashed cursor-pointer transition-all mb-4 ${
+              isDragging
+                ? 'border-indigo-400 bg-indigo-950/40 ring-4 ring-indigo-500/30 scale-105'
+                : 'border-[#2e374e] bg-[#141826]/80 hover:border-indigo-500/50 hover:bg-[#191f32]'
+            }`}
+          >
+            <div className="flex flex-col items-center justify-center text-center space-y-2">
+              <div className="w-12 h-12 rounded-2xl bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400">
+                <Upload className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white font-['Montserrat',sans-serif]">
+                  Arraste e solte seu vídeo aqui
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Suporta MP4, MOV, WEBM, AVI (Até 4K)
+                </p>
+              </div>
+              <div className="pt-1">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold shadow-md shadow-indigo-600/20">
+                  <FileVideo className="w-3.5 h-3.5" />
+                  <span>Selecionar Arquivo de Vídeo</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Action Buttons */}
+          <div className="w-full max-w-md space-y-2.5">
             <button
-              onClick={onNewProject}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              onClick={() => onNewProject()}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-5 rounded-xl bg-[#1b2131] hover:bg-[#242b3f] text-slate-200 font-semibold text-xs border border-[#2d364f] transition-all hover:scale-[1.01]"
             >
-              <PlusCircle className="w-5 h-5" />
-              <span>Novo Projeto</span>
+              <PlusCircle className="w-4 h-4 text-indigo-400" />
+              <span>Abrir Editor com Projeto 100% Limpo (Vazio)</span>
             </button>
+
+            {/* Default Aspect Ratio Notice & Social Presets */}
+            <div className="px-3.5 py-2 rounded-xl bg-[#141824] border border-[#242c3e] flex items-center justify-between text-[11px] text-slate-300">
+              <span className="flex items-center gap-1.5 font-medium">
+                <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+                <span>Formato Padrão: <strong>9:16</strong></span>
+              </span>
+              <span className="text-[10px] text-slate-400 bg-[#1c2233] px-2 py-0.5 rounded border border-[#2b354d]">
+                Reels • TikTok • Shorts
+              </span>
+            </div>
 
             <button
               onClick={() => onNavigate('editor')}
-              className="w-full flex items-center justify-center gap-2.5 py-3.5 px-6 rounded-xl bg-[#262c3e] hover:bg-[#31394f] text-slate-200 font-semibold text-sm border border-[#374059] transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full flex items-center justify-center gap-2.5 py-3 px-6 rounded-xl bg-[#262c3e] hover:bg-[#31394f] text-slate-200 font-semibold text-xs border border-[#374059] transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
-              <FolderOpen className="w-5 h-5 text-indigo-400" />
+              <FolderOpen className="w-4 h-4 text-indigo-400" />
               <span>Abrir Projeto Existente</span>
             </button>
           </div>

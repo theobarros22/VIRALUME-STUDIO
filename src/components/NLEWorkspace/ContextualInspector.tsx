@@ -10,9 +10,12 @@ import {
   Contrast, 
   Sparkles,
   RefreshCw,
-  SlidersHorizontal
+  SlidersHorizontal,
+  Zap,
+  Activity
 } from 'lucide-react';
 import { InspectorState } from '../../types';
+import { SpeedRampingPanel } from '../Inspector/SpeedRampingPanel';
 
 interface ContextualInspectorProps {
   inspectorState: InspectorState;
@@ -25,7 +28,7 @@ export const ContextualInspector: React.FC<ContextualInspectorProps> = ({
   onChange,
   onReset,
 }) => {
-  const [activeTab, setActiveTab] = useState<'transform' | 'color' | 'text'>('transform');
+  const [activeTab, setActiveTab] = useState<'transform' | 'color' | 'speed' | 'text'>('transform');
 
   return (
     <div className="h-full flex flex-col bg-[#141824] border-r border-[#222838] text-slate-200 text-xs select-none">
@@ -45,12 +48,13 @@ export const ContextualInspector: React.FC<ContextualInspectorProps> = ({
         </button>
       </div>
 
-      {/* Tabs matching Image 5 & 6 (Transform, Color, Text) */}
+      {/* Tabs matching Image 5 & 6 (Transform, Color, Speed, Text) */}
       <div className="flex items-center border-b border-[#1f2537] bg-[#0f121c] px-2 pt-1">
         {[
           { id: 'transform', label: 'Transformação', icon: Move },
-          { id: 'color', label: 'Cor & Gradação', icon: Palette },
-          { id: 'text', label: 'Texto / Legenda', icon: Sparkles },
+          { id: 'color', label: 'Cor & LUTs', icon: Palette },
+          { id: 'speed', label: 'Velocidade', icon: Zap },
+          { id: 'text', label: 'Legenda', icon: Sparkles },
         ].map((tab) => {
           const Icon = tab.icon;
           const isActive = activeTab === tab.id;
@@ -58,7 +62,7 @@ export const ContextualInspector: React.FC<ContextualInspectorProps> = ({
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium border-b-2 transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-1 py-2 text-[10.5px] font-medium border-b-2 transition-colors ${
                 isActive
                   ? 'border-indigo-500 text-indigo-300 bg-[#161a27]'
                   : 'border-transparent text-slate-400 hover:text-slate-200 hover:bg-[#141824]'
@@ -235,6 +239,38 @@ export const ContextualInspector: React.FC<ContextualInspectorProps> = ({
               </div>
             </div>
 
+            {/* Instagram Cinematic LUTs & Presets */}
+            <div className="space-y-2 pt-2 border-t border-[#1f2537]">
+              <div className="flex items-center justify-between text-[11px] text-slate-400 font-medium">
+                <span>Filtros & LUTs para Instagram</span>
+                <span className="text-[10px] text-indigo-400">1-Clique</span>
+              </div>
+              <div className="grid grid-cols-3 gap-1.5">
+                {[
+                  { name: 'Teal & Orange', exp: 0.2, cont: 0.4, sat: 0.5, temp: 0.3 },
+                  { name: 'iPhone HDR', exp: 0.3, cont: 0.2, sat: 0.4, temp: 0.0 },
+                  { name: 'Moody Cinema', exp: -0.2, cont: 0.6, sat: -0.3, temp: -0.2 },
+                  { name: 'Golden Hour', exp: 0.1, cont: 0.3, sat: 0.3, temp: 0.8 },
+                  { name: 'Cyberpunk', exp: 0.0, cont: 0.5, sat: 0.8, temp: -0.6 },
+                  { name: 'Clean Neutral', exp: 0.0, cont: 0.0, sat: 0.0, temp: 0.0 },
+                ].map((lut) => (
+                  <button
+                    key={lut.name}
+                    onClick={() => onChange({
+                      exposure: lut.exp,
+                      contrast: lut.cont,
+                      saturation: lut.sat,
+                      temperature: lut.temp,
+                    })}
+                    className="p-1.5 rounded-lg bg-[#111420] hover:bg-[#1c2236] border border-[#232a3d] hover:border-indigo-500/50 text-[10px] text-slate-300 font-medium text-center transition-all truncate"
+                    title={`Aplicar ${lut.name}`}
+                  >
+                    {lut.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Sliders matching Image 5 (Exposure, Contrast, Saturation, Temperature) */}
             <div className="space-y-3 pt-2 border-t border-[#1f2537]">
               {/* Exposure */}
@@ -308,7 +344,12 @@ export const ContextualInspector: React.FC<ContextualInspectorProps> = ({
           </div>
         )}
 
-        {/* TAB 3: TEXT / CAPTIONS */}
+        {/* TAB 3: SPEED RAMPING */}
+        {activeTab === 'speed' && (
+          <SpeedRampingPanel />
+        )}
+
+        {/* TAB 4: TEXT / CAPTIONS */}
         {activeTab === 'text' && (
           <div className="space-y-3">
             <div className="text-[11px] text-slate-400">Personalize o comportamento do texto dinâmico na cena:</div>
